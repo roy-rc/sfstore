@@ -1,0 +1,221 @@
+/* Admin Panel Styles for SFStore */
+
+/* Import Bootstrap customizations */
+@use "bootstrap-customizations";
+
+/* Admin specific variables */
+:root {
+    --admin-primary: #495057;
+    --admin-secondary: #6c757d;
+    --admin-sidebar-bg: #343a40;
+    --admin-sidebar-text: #adb5bd;
+    --admin-topbar-bg: #fff;
+    --admin-border-color: #dee2e6;
+}
+
+/* General admin layout */
+.admin-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar styles */
+.admin-sidebar {
+    width: 250px;
+    background-color: var(--admin-sidebar-bg);
+    color: var(--admin-sidebar-text);
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 1000;
+    transition: transform 0.3s ease-in-out;
+}
+
+.admin-sidebar .sidebar-brand {
+    padding: 1.5rem 1rem;
+    border-bottom: 1px solid #495057;
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.admin-sidebar .nav-link {
+    color: var(--admin-sidebar-text);
+    padding: 0.75rem 1rem;
+    border-radius: 0;
+    transition: all 0.2s ease;
+}
+
+.admin-sidebar .nav-link:hover,
+.admin-sidebar .nav-link.active {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.admin-sidebar .nav-link i {
+    width: 20px;
+    margin-right: 0.5rem;
+}
+
+/* Main content area */
+.admin-content {
+    flex: 1;
+    margin-left: 250px;
+    background-color: #f8f9fa;
+}
+
+/* Top navigation */
+.admin-topbar {
+    background-color: var(--admin-topbar-bg);
+    border-bottom: 1px solid var(--admin-border-color);
+    padding: 0.75rem 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.admin-topbar .btn-toggle-sidebar {
+    display: none;
+}
+
+/* Content container */
+.admin-main {
+    padding: 2rem;
+}
+
+/* Cards */
+.admin-card {
+    border: 1px solid var(--admin-border-color);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.admin-card .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid var(--admin-border-color);
+    font-weight: 600;
+}
+
+/* Statistics cards */
+.stats-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+}
+
+.stats-card.success {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.stats-card.warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.stats-card.info {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+/* Tables */
+.admin-table {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.admin-table .table {
+    margin-bottom: 0;
+}
+
+.admin-table .table th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid var(--admin-border-color);
+    font-weight: 600;
+    color: #495057;
+}
+
+/* Buttons */
+.btn-admin {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-admin:hover {
+    transform: translateY(-1px);
+}
+
+/* Forms */
+.admin-form .form-control,
+.admin-form .form-select {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+}
+
+.admin-form .form-control:focus,
+.admin-form .form-select:focus {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 0.2rem rgba(73, 80, 87, 0.25);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .admin-sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+    }
+    
+    .admin-sidebar.show {
+        transform: translateX(0);
+    }
+    
+    .admin-content {
+        margin-left: 0;
+    }
+    
+    .admin-topbar .btn-toggle-sidebar {
+        display: inline-block;
+    }
+    
+    .admin-main {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .admin-sidebar {
+        width: 100%;
+    }
+    
+    .stats-card {
+        margin-bottom: 1rem;
+    }
+    
+    .admin-main {
+        padding: 0.5rem;
+    }
+}
+
+/* Utilities */
+.text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
