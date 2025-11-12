@@ -1,0 +1,466 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Gestión de Carritos{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-shopping-cart me-2"></i>Gestión de Carritos
+{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h4 class="mb-0">Carritos de Compra</h4>
+        <p class="text-muted">Monitorea y gestiona los carritos activos de los clientes</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <button class="btn btn-outline-primary" onclick="location.reload()">
+            <i class="fas fa-sync-alt me-2"></i>Actualizar
+        </button>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">{{ carts|length }}</h4>
+                        <p class="mb-0">Total Carritos</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-shopping-cart fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">{{ carts|filter(c => c.cartItems|length > 0)|length }}</h4>
+                        <p class="mb-0">Con Productos</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-shopping-bag fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">{{ carts|filter(c => c.customer is null)|length }}</h4>
+                        <p class="mb-0">Anónimos</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-user-secret fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        {% set total_value = 0 %}
+                        {% for cart in carts %}
+                            {% set total_value = total_value + cart.total %}
+                        {% endfor %}
+                        <h4 class="mb-0">${{ total_value|number_format(2) }}</h4>
+                        <p class="mb-0">Valor Total</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Filtros y Búsqueda</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" class="form-control" placeholder="Buscar por cliente..." id="searchInput">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="statusFilter">
+                    <option value="">Todos los carritos</option>
+                    <option value="with-items">Con productos</option>
+                    <option value="empty">Vacíos</option>
+                    <option value="anonymous">Anónimos</option>
+                    <option value="registered">De clientes registrados</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input type="date" class="form-control" placeholder="Fecha desde" id="dateFilter">
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-outline-secondary w-100" id="clearFilters">
+                    <i class="fas fa-times me-2"></i>Limpiar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Carts Table -->
+<div class="card shadow-sm">
+    <div class="card-header bg-light">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h5 class="mb-0">Listado de Carritos</h5>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <small class="text-muted">Actualizado: {{ 'now'|date('d/m/Y H:i:s') }}</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card-body p-0">
+        {% if carts|length > 0 %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th width="50">#</th>
+                            <th>Cliente</th>
+                            <th class="text-center">Productos</th>
+                            <th class="text-end">Total</th>
+                            <th>Creado</th>
+                            <th>Actualizado</th>
+                            <th width="120" class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cartsTable">
+                        {% for cart in carts %}
+                            <tr data-customer="{{ cart.customer ? cart.customer.email|lower : 'anonimo' }}"
+                                data-has-items="{{ cart.cartItems|length > 0 ? 'true' : 'false' }}"
+                                data-is-anonymous="{{ cart.customer is null ? 'true' : 'false' }}"
+                                data-created="{{ cart.createdAt ? cart.createdAt|date('Y-m-d') : '' }}">
+                                <td class="align-middle">
+                                    <span class="badge bg-primary">{{ cart.id }}</span>
+                                </td>
+                                <td class="align-middle">
+                                    {% if cart.customer %}
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                                <i class="fas fa-user text-white"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">{{ cart.customer.firstName }} {{ cart.customer.lastName }}</h6>
+                                                <small class="text-muted">{{ cart.customer.email }}</small>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                                <i class="fas fa-user-secret text-white"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">Cliente Anónimo</h6>
+                                                <small class="text-muted">Session: {{ cart.sessionId ? cart.sessionId|slice(0, 8) ~ '...' : 'N/A' }}</small>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle text-center">
+                                    {% if cart.cartItems|length > 0 %}
+                                        <span class="badge bg-success">{{ cart.cartItems|length }}</span>
+                                        <br>
+                                        <small class="text-muted">{{ cart.totalQuantity }} unidades</small>
+                                    {% else %}
+                                        <span class="badge bg-secondary">0</span>
+                                        <br>
+                                        <small class="text-muted">Vacío</small>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle text-end">
+                                    {% if cart.cartItems|length > 0 %}
+                                        <strong class="h6">${{ cart.total|number_format(2) }}</strong>
+                                    {% else %}
+                                        <span class="text-muted">$0.00</span>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle">
+                                    <small class="text-muted">
+                                        {{ cart.createdAt ? cart.createdAt|date('d/m/Y H:i') : 'N/A' }}
+                                    </small>
+                                </td>
+                                <td class="align-middle">
+                                    <small class="text-muted">
+                                        {{ cart.updatedAt ? cart.updatedAt|date('d/m/Y H:i') : 'N/A' }}
+                                    </small>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" 
+                                                class="btn btn-outline-info" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#cartModal{{ cart.id }}"
+                                                data-bs-toggle="tooltip" 
+                                                title="Ver detalles">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        {% if cart.cartItems|length > 0 %}
+                                            <button type="button" 
+                                                    class="btn btn-outline-warning" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#clearModal{{ cart.id }}"
+                                                    data-bs-toggle="tooltip" 
+                                                    title="Vaciar carrito">
+                                                <i class="fas fa-broom"></i>
+                                            </button>
+                                        {% endif %}
+                                        <button type="button" 
+                                                class="btn btn-outline-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#deleteModal{{ cart.id }}"
+                                                data-bs-toggle="tooltip" 
+                                                title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Cart Details Modal -->
+                            <div class="modal fade" id="cartModal{{ cart.id }}" tabindex="-1">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">
+                                                <i class="fas fa-shopping-cart me-2"></i>
+                                                Detalles del Carrito #{{ cart.id }}
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <strong>Cliente:</strong>
+                                                    {% if cart.customer %}
+                                                        {{ cart.customer.firstName }} {{ cart.customer.lastName }}<br>
+                                                        <small class="text-muted">{{ cart.customer.email }}</small>
+                                                    {% else %}
+                                                        Cliente Anónimo<br>
+                                                        <small class="text-muted">Session: {{ cart.sessionId }}</small>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="col-md-6 text-md-end">
+                                                    <strong>Total: ${{ cart.total|number_format(2) }}</strong><br>
+                                                    <small class="text-muted">{{ cart.cartItems|length }} producto(s)</small>
+                                                </div>
+                                            </div>
+                                            
+                                            {% if cart.cartItems|length > 0 %}
+                                                <h6>Productos en el carrito:</h6>
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Producto</th>
+                                                                <th class="text-center">Cantidad</th>
+                                                                <th class="text-end">Precio Unit.</th>
+                                                                <th class="text-end">Total</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {% for item in cart.cartItems %}
+                                                                <tr>
+                                                                    <td>{{ item.product.name }}</td>
+                                                                    <td class="text-center">{{ item.quantity }}</td>
+                                                                    <td class="text-end">${{ item.product.price|number_format(2) }}</td>
+                                                                    <td class="text-end">${{ item.total|number_format(2) }}</td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr class="fw-bold">
+                                                                <td colspan="3">Total:</td>
+                                                                <td class="text-end">${{ cart.total|number_format(2) }}</td>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            {% else %}
+                                                <div class="text-center py-3">
+                                                    <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                                                    <p>Este carrito está vacío</p>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Clear Cart Modal -->
+                            {% if cart.cartItems|length > 0 %}
+                                <div class="modal fade" id="clearModal{{ cart.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Vaciar Carrito</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>¿Estás seguro de que deseas vaciar este carrito?</p>
+                                                <p><strong>Se eliminarán {{ cart.cartItems|length }} producto(s)</strong> por un valor de <strong>${{ cart.total|number_format(2) }}</strong></p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <form method="post" action="{{ path('admin_cart_clear', {'id': cart.id}) }}" class="d-inline">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('clear' ~ cart.id) }}">
+                                                    <button type="submit" class="btn btn-warning">
+                                                        <i class="fas fa-broom me-2"></i>Vaciar Carrito
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <!-- Delete Cart Modal -->
+                            <div class="modal fade" id="deleteModal{{ cart.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Eliminar Carrito</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>¿Estás seguro de que deseas eliminar este carrito completamente?</p>
+                                            {% if cart.cartItems|length > 0 %}
+                                                <div class="alert alert-warning">
+                                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                                    Este carrito contiene productos. Al eliminarlo se perderán permanentemente.
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <form method="post" action="{{ path('admin_cart_delete', {'id': cart.id}) }}" class="d-inline">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ cart.id) }}">
+                                                <button type="submit" class="btn btn-danger">
+                                                    <i class="fas fa-trash me-2"></i>Eliminar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-shopping-cart fa-5x text-muted mb-4"></i>
+                <h4>No hay carritos activos</h4>
+                <p class="text-muted mb-4">Los carritos aparecerán aquí cuando los clientes agreguen productos</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Filter functionality
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const dateFilter = document.getElementById('dateFilter');
+    const clearFilters = document.getElementById('clearFilters');
+    const tableRows = document.querySelectorAll('#cartsTable tr');
+    
+    function filterCarts() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedStatus = statusFilter.value;
+        const selectedDate = dateFilter.value;
+        
+        tableRows.forEach(row => {
+            const customer = row.dataset.customer || '';
+            const hasItems = row.dataset.hasItems === 'true';
+            const isAnonymous = row.dataset.isAnonymous === 'true';
+            const created = row.dataset.created || '';
+            
+            let isVisible = true;
+            
+            // Search filter
+            if (searchTerm && !customer.includes(searchTerm)) {
+                isVisible = false;
+            }
+            
+            // Status filter
+            if (selectedStatus) {
+                switch (selectedStatus) {
+                    case 'with-items':
+                        if (!hasItems) isVisible = false;
+                        break;
+                    case 'empty':
+                        if (hasItems) isVisible = false;
+                        break;
+                    case 'anonymous':
+                        if (!isAnonymous) isVisible = false;
+                        break;
+                    case 'registered':
+                        if (isAnonymous) isVisible = false;
+                        break;
+                }
+            }
+            
+            // Date filter
+            if (selectedDate && created < selectedDate) {
+                isVisible = false;
+            }
+            
+            row.style.display = isVisible ? '' : 'none';
+        });
+    }
+    
+    // Add event listeners
+    searchInput.addEventListener('input', filterCarts);
+    statusFilter.addEventListener('change', filterCarts);
+    dateFilter.addEventListener('change', filterCarts);
+    
+    // Clear filters
+    clearFilters.addEventListener('click', function() {
+        searchInput.value = '';
+        statusFilter.value = '';
+        dateFilter.value = '';
+        filterCarts();
+    });
+});
+</script>
+{% endblock %}

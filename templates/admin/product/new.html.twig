@@ -1,0 +1,378 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Crear Producto - Administración{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-plus me-2"></i>Crear Nuevo Producto
+{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-box me-2"></i>Información del Producto
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for flash in app.session.flashbag.get('error') %}
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <i class="fas fa-exclamation-circle me-2"></i>{{ flash }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+
+                <form method="post" enctype="multipart/form-data">
+                    <div class="row">
+                        <!-- Información Básica -->
+                        <div class="col-12 mb-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-info-circle me-2"></i>Información Básica
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="name" class="form-label fw-semibold">
+                                <i class="fas fa-tag me-2"></i>Nombre del Producto *
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="name" 
+                                   name="name" 
+                                   value="{{ product.name ?? '' }}" 
+                                   required 
+                                   placeholder="Ej: iPhone 15 Pro">
+                            <div class="form-text">El nombre será usado para generar la URL automáticamente</div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="sku" class="form-label fw-semibold">
+                                <i class="fas fa-barcode me-2"></i>SKU (Código) *
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="sku" 
+                                   name="sku" 
+                                   value="{{ product.sku ?? '' }}" 
+                                   required 
+                                   placeholder="Ej: IPHONE15PRO001">
+                            <div class="form-text">Código único del producto</div>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="description" class="form-label fw-semibold">
+                                <i class="fas fa-align-left me-2"></i>Descripción
+                            </label>
+                            <textarea class="form-control" 
+                                      id="description" 
+                                      name="description" 
+                                      rows="4" 
+                                      placeholder="Describe las características del producto...">{{ product.description ?? '' }}</textarea>
+                        </div>
+
+                        <!-- Precios y Stock -->
+                        <div class="col-12 mb-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-dollar-sign me-2"></i>Precios y Stock
+                            </h6>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="price" class="form-label fw-semibold">
+                                <i class="fas fa-money-bill me-2"></i>Precio *
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="price" 
+                                       name="price" 
+                                       value="{{ product.price ?? '' }}" 
+                                       step="0.01" 
+                                       min="0" 
+                                       required 
+                                       placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="stock" class="form-label fw-semibold">
+                                <i class="fas fa-boxes me-2"></i>Stock Inicial *
+                            </label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   id="stock" 
+                                   name="stock" 
+                                   value="{{ product.stock ?? 0 }}" 
+                                   min="0" 
+                                   required 
+                                   placeholder="0">
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-toggle-on me-2"></i>Estado
+                            </label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       id="isActive" 
+                                       name="isActive" 
+                                       value="1"
+                                       {{ (product.isActive ?? true) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="isActive">
+                                    Producto Activo
+                                </label>
+                            </div>
+                            <div class="form-text">Solo los productos activos aparecen en la tienda</div>
+                        </div>
+
+                        <!-- Categorías -->
+                        <div class="col-12 mb-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-tags me-2"></i>Categorización
+                            </h6>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-semibold">Categorías</label>
+                            {% if categories|length > 0 %}
+                                <div class="row">
+                                    {% for category in categories %}
+                                        <div class="col-md-4 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" 
+                                                       type="checkbox" 
+                                                       id="category_{{ category.id }}" 
+                                                       name="categories[]" 
+                                                       value="{{ category.id }}">
+                                                <label class="form-check-label" for="category_{{ category.id }}">
+                                                    {{ category.name }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    No hay categorías creadas. <a href="{{ path('admin_categories_new') }}">Crear una categoría primero</a>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Imagen -->
+                        <div class="col-12 mb-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-image me-2"></i>Imagen del Producto
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="image" class="form-label fw-semibold">URL de la Imagen</label>
+                            <input type="url" 
+                                   class="form-control" 
+                                   id="image" 
+                                   name="image" 
+                                   value="{{ product.image ?? '' }}" 
+                                   placeholder="https://ejemplo.com/imagen.jpg">
+                            <div class="form-text">URL directa a la imagen del producto</div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="imageFile" class="form-label fw-semibold">O subir archivo</label>
+                            <input type="file" 
+                                   class="form-control" 
+                                   id="imageFile" 
+                                   name="imageFile" 
+                                   accept="image/*">
+                            <div class="form-text">Formatos: JPG, PNG, WebP (máx. 2MB)</div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ path('admin_products_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Crear Producto
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Panel -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm sticky-top" style="top: 20px;">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="fas fa-eye me-2"></i>Vista Previa
+                </h6>
+            </div>
+            <div class="card-body">
+                <div id="productPreview">
+                    <div class="text-center mb-3">
+                        <div id="previewImage" class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="fas fa-image fa-3x text-muted"></i>
+                        </div>
+                    </div>
+                    
+                    <h6 id="previewName" class="text-muted">Nombre del producto</h6>
+                    <p id="previewSku" class="small text-muted">SKU: ---</p>
+                    <p id="previewDescription" class="text-muted small">Descripción del producto...</p>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="h5 text-primary mb-0" id="previewPrice">$0.00</span>
+                        <span class="badge bg-secondary" id="previewStock">Stock: 0</span>
+                    </div>
+                    
+                    <div id="previewCategories" class="mb-3">
+                        <small class="text-muted">Sin categorías</small>
+                    </div>
+                    
+                    <span id="previewStatus" class="badge bg-success">Activo</span>
+                </div>
+            </div>
+            
+            <div class="card-footer">
+                <div class="d-grid">
+                    <small class="text-muted text-center">
+                        <i class="fas fa-info-circle me-1"></i>
+                        La vista previa se actualiza automáticamente
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Panel -->
+        <div class="card shadow-sm mt-3">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="fas fa-question-circle me-2"></i>Ayuda
+                </h6>
+            </div>
+            <div class="card-body">
+                <small>
+                    <ul class="mb-0 ps-3">
+                        <li>El <strong>SKU</strong> debe ser único</li>
+                        <li>El <strong>precio</strong> se muestra con 2 decimales</li>
+                        <li>Las <strong>categorías</strong> ayudan a organizar productos</li>
+                        <li>Solo productos <strong>activos</strong> son visibles en la tienda</li>
+                    </ul>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Elements
+    const nameInput = document.getElementById('name');
+    const skuInput = document.getElementById('sku');
+    const descriptionInput = document.getElementById('description');
+    const priceInput = document.getElementById('price');
+    const stockInput = document.getElementById('stock');
+    const isActiveInput = document.getElementById('isActive');
+    const imageInput = document.getElementById('image');
+    const categoryInputs = document.querySelectorAll('input[name="categories[]"]');
+
+    // Preview elements
+    const previewName = document.getElementById('previewName');
+    const previewSku = document.getElementById('previewSku');
+    const previewDescription = document.getElementById('previewDescription');
+    const previewPrice = document.getElementById('previewPrice');
+    const previewStock = document.getElementById('previewStock');
+    const previewStatus = document.getElementById('previewStatus');
+    const previewImage = document.getElementById('previewImage');
+    const previewCategories = document.getElementById('previewCategories');
+
+    // Update preview function
+    function updatePreview() {
+        // Name
+        previewName.textContent = nameInput.value || 'Nombre del producto';
+        
+        // SKU
+        previewSku.textContent = 'SKU: ' + (skuInput.value || '---');
+        
+        // Description
+        const desc = descriptionInput.value || 'Descripción del producto...';
+        previewDescription.textContent = desc.length > 100 ? desc.substring(0, 100) + '...' : desc;
+        
+        // Price
+        const price = parseFloat(priceInput.value) || 0;
+        previewPrice.textContent = '$' + price.toFixed(2);
+        
+        // Stock
+        const stock = parseInt(stockInput.value) || 0;
+        previewStock.textContent = 'Stock: ' + stock;
+        previewStock.className = stock > 0 ? 'badge bg-success' : 'badge bg-danger';
+        
+        // Status
+        if (isActiveInput.checked) {
+            previewStatus.textContent = 'Activo';
+            previewStatus.className = 'badge bg-success';
+        } else {
+            previewStatus.textContent = 'Inactivo';
+            previewStatus.className = 'badge bg-secondary';
+        }
+        
+        // Categories
+        const selectedCategories = [];
+        categoryInputs.forEach(input => {
+            if (input.checked) {
+                selectedCategories.push(input.nextElementSibling.textContent.trim());
+            }
+        });
+        
+        if (selectedCategories.length > 0) {
+            previewCategories.innerHTML = selectedCategories.map(cat => 
+                `<span class="badge bg-primary me-1">${cat}</span>`
+            ).join('');
+        } else {
+            previewCategories.innerHTML = '<small class="text-muted">Sin categorías</small>';
+        }
+        
+        // Image
+        if (imageInput.value) {
+            previewImage.innerHTML = `<img src="${imageInput.value}" alt="Preview" style="max-width: 100%; height: 200px; object-fit: cover;" class="rounded">`;
+        } else {
+            previewImage.innerHTML = '<i class="fas fa-image fa-3x text-muted"></i>';
+        }
+    }
+
+    // Add event listeners
+    nameInput.addEventListener('input', updatePreview);
+    skuInput.addEventListener('input', updatePreview);
+    descriptionInput.addEventListener('input', updatePreview);
+    priceInput.addEventListener('input', updatePreview);
+    stockInput.addEventListener('input', updatePreview);
+    isActiveInput.addEventListener('change', updatePreview);
+    imageInput.addEventListener('input', updatePreview);
+    categoryInputs.forEach(input => input.addEventListener('change', updatePreview));
+
+    // Auto-generate SKU from name
+    nameInput.addEventListener('input', function() {
+        if (!skuInput.value) {
+            const sku = this.value
+                .toUpperCase()
+                .replace(/[^A-Z0-9]/g, '')
+                .substring(0, 15);
+            skuInput.value = sku;
+            updatePreview();
+        }
+    });
+
+    // Initial preview update
+    updatePreview();
+});
+</script>
+{% endblock %}

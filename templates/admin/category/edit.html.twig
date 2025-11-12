@@ -1,0 +1,317 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Editar Categoría - Administración{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-edit me-2"></i>Editar Categoría: {{ category.name }}
+{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-edit me-2"></i>Editar Categoría: {{ category.name }}
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for flash in app.session.flashbag.get('error') %}
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <i class="fas fa-exclamation-circle me-2"></i>{{ flash }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+
+                <form method="post">
+                    <div class="row">
+                        <!-- Información Básica -->
+                        <div class="col-12 mb-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-info-circle me-2"></i>Información Básica
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="name" class="form-label fw-semibold">
+                                <i class="fas fa-tag me-2"></i>Nombre de la Categoría *
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="name" 
+                                   name="name" 
+                                   value="{{ category.name }}" 
+                                   required 
+                                   placeholder="Ej: Electrónicos">
+                            <div class="form-text">El nombre será usado para generar la URL automáticamente</div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="slug" class="form-label fw-semibold">
+                                <i class="fas fa-link me-2"></i>Slug (URL)
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="slug" 
+                                   name="slug" 
+                                   value="{{ category.slug }}" 
+                                   readonly 
+                                   placeholder="Se genera automáticamente">
+                            <div class="form-text">URL amigable generada automáticamente</div>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="description" class="form-label fw-semibold">
+                                <i class="fas fa-align-left me-2"></i>Descripción
+                            </label>
+                            <textarea class="form-control" 
+                                      id="description" 
+                                      name="description" 
+                                      rows="4" 
+                                      placeholder="Describe esta categoría y qué tipo de productos incluye...">{{ category.description }}</textarea>
+                            <div class="form-text">Ayuda a los clientes a entender qué encontrarán en esta categoría</div>
+                        </div>
+
+                        <!-- Jerarquía -->
+                        {% if main_categories|length > 0 %}
+                            <div class="col-12 mb-4">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-sitemap me-2"></i>Jerarquía
+                                </h6>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="parent" class="form-label fw-semibold">Categoría Padre</label>
+                                <select class="form-select" id="parent" name="parent">
+                                    <option value="">Sin categoría padre (nivel principal)</option>
+                                    {% for main_category in main_categories %}
+                                        {% if main_category.id != category.id %}
+                                            <option value="{{ main_category.id }}" {{ category.parent and category.parent.id == main_category.id ? 'selected' : '' }}>
+                                                {{ main_category.name }}
+                                            </option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Selecciona una categoría padre para crear una subcategoría</div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Estado -->
+                        <div class="col-12 mb-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-cog me-2"></i>Configuración
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-toggle-on me-2"></i>Estado
+                            </label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       id="isActive" 
+                                       name="isActive" 
+                                       value="1"
+                                       {{ category.isActive ? 'checked' : '' }}>
+                                <label class="form-check-label" for="isActive">
+                                    Categoría Activa
+                                </label>
+                            </div>
+                            <div class="form-text">Solo las categorías activas aparecen en la tienda</div>
+                        </div>
+
+                        <!-- Información adicional -->
+                        <div class="col-12 mb-4">
+                            <h6 class="text-info mb-3">
+                                <i class="fas fa-clock me-2"></i>Información del Sistema
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small class="text-muted">
+                                        <strong>Creada:</strong> {{ category.createdAt ? category.createdAt|date('d/m/Y H:i') : 'N/A' }}
+                                    </small>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-muted">
+                                        <strong>Actualizada:</strong> {{ category.updatedAt ? category.updatedAt|date('d/m/Y H:i') : 'N/A' }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <a href="{{ path('admin_categories_index') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Cancelar
+                            </a>
+                        </div>
+                        <div>
+                            <a href="{{ path('category_show', {'slug': category.slug}) }}" 
+                               class="btn btn-outline-info me-2" 
+                               target="_blank">
+                                <i class="fas fa-external-link-alt me-2"></i>Ver en Tienda
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save me-2"></i>Actualizar Categoría
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Panel -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm sticky-top" style="top: 20px;">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>Consejos para Editar
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h6 class="text-warning">⚠️ Ten Cuidado</h6>
+                    <ul class="small mb-0">
+                        <li>Cambiar el nombre afectará la URL</li>
+                        <li>Desactivar afectará productos asociados</li>
+                        <li>Cambiar jerarquía puede confundir navegación</li>
+                    </ul>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="text-info">📊 Estadísticas</h6>
+                    <div class="small">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Productos:</span>
+                            <strong>{{ category.products ? category.products|length : 0 }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Subcategorías:</span>
+                            <strong>{{ category.children ? category.children|length : 0 }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Estado:</span>
+                            <span class="badge {{ category.isActive ? 'bg-success' : 'bg-secondary' }} rounded-pill">
+                                {{ category.isActive ? 'Activa' : 'Inactiva' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="card shadow-sm mt-3">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="fas fa-eye me-2"></i>Vista Previa
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                        <i class="fas fa-tag text-dark"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-0" id="previewName">{{ category.name }}</h6>
+                        <small class="text-muted" id="previewSlug">URL: /categoria/{{ category.slug }}</small>
+                    </div>
+                </div>
+                
+                <p class="text-muted small mb-3" id="previewDescription">
+                    {{ category.description ?: 'Sin descripción...' }}
+                </p>
+                
+                <div class="d-flex justify-content-between align-items-center">
+                    <span id="previewStatus" class="badge {{ category.isActive ? 'bg-success' : 'bg-secondary' }}">
+                        {{ category.isActive ? 'Activa' : 'Inactiva' }}
+                    </span>
+                    <small class="text-muted" id="previewParent">
+                        {{ category.parent ? ('Subcategoría de: ' ~ category.parent.name) : 'Nivel principal' }}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.getElementById('name');
+    const slugInput = document.getElementById('slug');
+    const descriptionInput = document.getElementById('description');
+    const isActiveInput = document.getElementById('isActive');
+    const parentSelect = document.getElementById('parent');
+    
+    const previewName = document.getElementById('previewName');
+    const previewSlug = document.getElementById('previewSlug');
+    const previewDescription = document.getElementById('previewDescription');
+    const previewStatus = document.getElementById('previewStatus');
+    const previewParent = document.getElementById('previewParent');
+
+    function generateSlug(text) {
+        return text
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // Remove accents
+            .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+            .trim()
+            .replace(/\s+/g, '-') // Replace spaces with hyphens
+            .replace(/-+/g, '-'); // Remove duplicate hyphens
+    }
+
+    function updatePreview() {
+        // Name and slug
+        const name = nameInput.value || '{{ category.name }}';
+        const slug = generateSlug(name);
+        
+        previewName.textContent = name;
+        slugInput.value = slug;
+        previewSlug.textContent = `URL: /categoria/${slug}`;
+        
+        // Description
+        const description = descriptionInput.value || 'Sin descripción...';
+        previewDescription.textContent = description.length > 80 
+            ? description.substring(0, 80) + '...' 
+            : description;
+        
+        // Status
+        if (isActiveInput.checked) {
+            previewStatus.textContent = 'Activa';
+            previewStatus.className = 'badge bg-success';
+        } else {
+            previewStatus.textContent = 'Inactiva';
+            previewStatus.className = 'badge bg-secondary';
+        }
+        
+        // Parent
+        if (parentSelect && parentSelect.value) {
+            const parentName = parentSelect.options[parentSelect.selectedIndex].text;
+            previewParent.textContent = `Subcategoría de: ${parentName}`;
+        } else if (parentSelect) {
+            previewParent.textContent = 'Nivel principal';
+        }
+    }
+
+    // Add event listeners
+    nameInput.addEventListener('input', updatePreview);
+    descriptionInput.addEventListener('input', updatePreview);
+    isActiveInput.addEventListener('change', updatePreview);
+    
+    if (parentSelect) {
+        parentSelect.addEventListener('change', updatePreview);
+    }
+
+    // Initial update
+    updatePreview();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,430 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Gestión de Productos{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-box me-2"></i>Gestión de Productos
+{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h4 class="mb-0">Lista de Productos</h4>
+        <p class="text-muted">Administra el catálogo de productos de tu tienda</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="{{ path('admin_products_new') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Nuevo Producto
+        </a>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">{{ products|length }}</h4>
+                        <p class="mb-0">Total Productos</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-box fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">{{ products|filter(p => p.stock > 0)|length }}</h4>
+                        <p class="mb-0">En Stock</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">{{ products|filter(p => p.stock == 0)|length }}</h4>
+                        <p class="mb-0">Sin Stock</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-exclamation-triangle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        {% set inventory_value = 0 %}
+                        {% for product in products %}
+                            {% set inventory_value = inventory_value + (product.priceAsFloat * product.stock) %}
+                        {% endfor %}
+                        <h4 class="mb-0">${{ inventory_value|number_format(2) }}</h4>
+                        <p class="mb-0">Valor Inventario</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters and Actions -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-light">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h5 class="mb-0">Filtros y Búsqueda</h5>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#filtersCollapse">
+                    <i class="fas fa-filter me-2"></i>Filtros Avanzados
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" class="form-control" placeholder="Buscar productos por nombre o SKU..." id="searchInput">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="categoryFilter">
+                    <option value="">Todas las categorías</option>
+                    {% for product in products %}
+                        {% for category in product.categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="stockFilter">
+                    <option value="">Todo el stock</option>
+                    <option value="in-stock">En stock</option>
+                    <option value="out-of-stock">Sin stock</option>
+                    <option value="low-stock">Stock bajo (&lt;10)</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Advanced Filters -->
+        <div class="collapse mt-3" id="filtersCollapse">
+            <div class="row">
+                <div class="col-md-3">
+                    <label for="minPrice" class="form-label">Precio mínimo</label>
+                    <input type="number" class="form-control" id="minPrice" step="0.01" min="0">
+                </div>
+                <div class="col-md-3">
+                    <label for="maxPrice" class="form-label">Precio máximo</label>
+                    <input type="number" class="form-control" id="maxPrice" step="0.01" min="0">
+                </div>
+                <div class="col-md-3">
+                    <label for="statusFilter" class="form-label">Estado</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">Todos</option>
+                        <option value="active">Activos</option>
+                        <option value="inactive">Inactivos</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-outline-secondary w-100" id="clearFilters">
+                        <i class="fas fa-times me-2"></i>Limpiar Filtros
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Products Table -->
+<div class="card shadow-sm">
+    <div class="card-header bg-light">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h5 class="mb-0">Listado de Productos</h5>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <div class="btn-group btn-group-sm" role="group">
+                    <button class="btn btn-outline-secondary" id="gridView">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary active" id="listView">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card-body p-0">
+        {% if products|length > 0 %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th width="80">Imagen</th>
+                            <th>Producto</th>
+                            <th>SKU</th>
+                            <th>Categorías</th>
+                            <th class="text-end">Precio</th>
+                            <th class="text-center">Stock</th>
+                            <th class="text-center">Estado</th>
+                            <th width="150" class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTable">
+                        {% for product in products %}
+                            <tr data-product-name="{{ product.name|lower }}" 
+                                data-product-sku="{{ product.sku|lower }}"
+                                data-product-price="{{ product.priceAsFloat }}"
+                                data-product-stock="{{ product.stock }}"
+                                data-product-active="{{ product.isActive ? 'true' : 'false' }}">
+                                <td class="align-middle">
+                                    {% if product.image %}
+                                        <img src="{{ product.image }}" 
+                                             alt="{{ product.name }}" 
+                                             class="rounded" 
+                                             style="width: 50px; height: 50px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                             style="width: 50px; height: 50px;">
+                                            <i class="fas fa-image text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle">
+                                    <div>
+                                        <h6 class="mb-1">{{ product.name }}</h6>
+                                        {% if product.description %}
+                                            <small class="text-muted">{{ product.description|length > 50 ? product.description|slice(0, 50) ~ '...' : product.description }}</small>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="align-middle">
+                                    <code>{{ product.sku }}</code>
+                                </td>
+                                <td class="align-middle">
+                                    {% if product.categories|length > 0 %}
+                                        {% for category in product.categories %}
+                                            <span class="badge bg-secondary me-1">{{ category.name }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-muted font-italic">Sin categoría</span>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle text-end">
+                                    <strong>${{ product.price|number_format(2) }}</strong>
+                                </td>
+                                <td class="align-middle text-center">
+                                    {% if product.stock == 0 %}
+                                        <span class="badge bg-danger">{{ product.stock }}</span>
+                                    {% elseif product.stock < 10 %}
+                                        <span class="badge bg-warning text-dark">{{ product.stock }}</span>
+                                    {% else %}
+                                        <span class="badge bg-success">{{ product.stock }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle text-center">
+                                    {% if product.isActive %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Activo
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times me-1"></i>Inactivo
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{{ path('product_show', {'slug': product.slug}) }}" 
+                                           class="btn btn-outline-info" 
+                                           target="_blank"
+                                           data-bs-toggle="tooltip" 
+                                           title="Ver en tienda">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                        <a href="{{ path('admin_products_edit', {'id': product.id}) }}" 
+                                           class="btn btn-outline-primary"
+                                           data-bs-toggle="tooltip" 
+                                           title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" 
+                                                class="btn btn-outline-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#deleteModal{{ product.id }}"
+                                                data-bs-toggle="tooltip" 
+                                                title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Delete Modal for each product -->
+                            <div class="modal fade" id="deleteModal{{ product.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Confirmar Eliminación</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>¿Estás seguro de que deseas eliminar el producto <strong>"{{ product.name }}"</strong>?</p>
+                                            {% if product.cartItems|length > 0 or product.orderItems|length > 0 %}
+                                                <div class="alert alert-warning">
+                                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                                    Este producto está en carritos de compra o tiene órdenes asociadas. 
+                                                    La eliminación podría afectar estas transacciones.
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <form method="post" action="{{ path('admin_products_delete', {'id': product.id}) }}" class="d-inline">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
+                                                <button type="submit" class="btn btn-danger">
+                                                    <i class="fas fa-trash me-2"></i>Eliminar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-box fa-5x text-muted mb-4"></i>
+                <h4>No hay productos creados</h4>
+                <p class="text-muted mb-4">Comienza agregando tu primer producto al catálogo</p>
+                <a href="{{ path('admin_products_new') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Crear Primer Producto
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Get table and inputs
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const stockFilter = document.getElementById('stockFilter');
+    const minPrice = document.getElementById('minPrice');
+    const maxPrice = document.getElementById('maxPrice');
+    const statusFilter = document.getElementById('statusFilter');
+    const clearFilters = document.getElementById('clearFilters');
+    const tableRows = document.querySelectorAll('#productsTable tr');
+    
+    // Filter function
+    function filterProducts() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedCategory = categoryFilter.value;
+        const selectedStock = stockFilter.value;
+        const minPriceValue = parseFloat(minPrice.value) || 0;
+        const maxPriceValue = parseFloat(maxPrice.value) || Infinity;
+        const selectedStatus = statusFilter.value;
+        
+        tableRows.forEach(row => {
+            const productName = row.dataset.productName || '';
+            const productSku = row.dataset.productSku || '';
+            const productPrice = parseFloat(row.dataset.productPrice) || 0;
+            const productStock = parseInt(row.dataset.productStock) || 0;
+            const productActive = row.dataset.productActive === 'true';
+            
+            let isVisible = true;
+            
+            // Search filter
+            if (searchTerm && !productName.includes(searchTerm) && !productSku.includes(searchTerm)) {
+                isVisible = false;
+            }
+            
+            // Price filters
+            if (productPrice < minPriceValue || productPrice > maxPriceValue) {
+                isVisible = false;
+            }
+            
+            // Stock filter
+            if (selectedStock) {
+                switch (selectedStock) {
+                    case 'in-stock':
+                        if (productStock === 0) isVisible = false;
+                        break;
+                    case 'out-of-stock':
+                        if (productStock > 0) isVisible = false;
+                        break;
+                    case 'low-stock':
+                        if (productStock >= 10) isVisible = false;
+                        break;
+                }
+            }
+            
+            // Status filter
+            if (selectedStatus) {
+                if (selectedStatus === 'active' && !productActive) isVisible = false;
+                if (selectedStatus === 'inactive' && productActive) isVisible = false;
+            }
+            
+            row.style.display = isVisible ? '' : 'none';
+        });
+    }
+    
+    // Add event listeners
+    searchInput.addEventListener('input', filterProducts);
+    categoryFilter.addEventListener('change', filterProducts);
+    stockFilter.addEventListener('change', filterProducts);
+    minPrice.addEventListener('input', filterProducts);
+    maxPrice.addEventListener('input', filterProducts);
+    statusFilter.addEventListener('change', filterProducts);
+    
+    // Clear filters
+    clearFilters.addEventListener('click', function() {
+        searchInput.value = '';
+        categoryFilter.value = '';
+        stockFilter.value = '';
+        minPrice.value = '';
+        maxPrice.value = '';
+        statusFilter.value = '';
+        filterProducts();
+    });
+});
+</script>
+{% endblock %}

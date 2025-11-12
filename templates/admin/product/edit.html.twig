@@ -1,0 +1,436 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Editar Producto - Administración{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-edit me-2"></i>Editar Producto: {{ product.name }}
+{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-edit me-2"></i>Editar Producto: {{ product.name }}
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for flash in app.session.flashbag.get('error') %}
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <i class="fas fa-exclamation-circle me-2"></i>{{ flash }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+
+                <form method="post" id="productForm">
+                    <div class="row">
+                        <!-- Información Básica -->
+                        <div class="col-12 mb-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-info-circle me-2"></i>Información Básica
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="name" class="form-label fw-semibold">Nombre del Producto *</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="name" 
+                                   name="name" 
+                                   value="{{ product.name }}" 
+                                   required 
+                                   placeholder="Ej: iPhone 15 Pro Max">
+                            <div class="form-text">Nombre comercial del producto</div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="sku" class="form-label fw-semibold">SKU (Código) *</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="sku" 
+                                   name="sku" 
+                                   value="{{ product.sku }}" 
+                                   required 
+                                   placeholder="Ej: IPH15PM128GB">
+                            <div class="form-text">Código único para identificar el producto</div>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="description" class="form-label fw-semibold">Descripción</label>
+                            <textarea class="form-control" 
+                                      id="description" 
+                                      name="description" 
+                                      rows="4" 
+                                      placeholder="Describe las características y beneficios del producto...">{{ product.description }}</textarea>
+                            <div class="form-text">Descripción detallada que aparecerá en la página del producto</div>
+                        </div>
+
+                        <!-- Precio y Stock -->
+                        <div class="col-12 mb-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-dollar-sign me-2"></i>Precio y Stock
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="price" class="form-label fw-semibold">Precio *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="price" 
+                                       name="price" 
+                                       value="{{ product.price }}" 
+                                       step="0.01" 
+                                       min="0" 
+                                       required 
+                                       placeholder="0.00">
+                            </div>
+                            <div class="form-text">Precio de venta al público</div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="stock" class="form-label fw-semibold">Stock Disponible *</label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   id="stock" 
+                                   name="stock" 
+                                   value="{{ product.stock }}" 
+                                   min="0" 
+                                   required 
+                                   placeholder="0">
+                            <div class="form-text">Cantidad disponible en inventario</div>
+                        </div>
+
+                        <!-- Imagen -->
+                        <div class="col-12 mb-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-image me-2"></i>Imagen
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="image" class="form-label fw-semibold">URL de la Imagen</label>
+                            <input type="url" 
+                                   class="form-control" 
+                                   id="image" 
+                                   name="image" 
+                                   value="{{ product.image }}" 
+                                   placeholder="https://ejemplo.com/imagen.jpg">
+                            <div class="form-text">URL directa a la imagen del producto</div>
+                        </div>
+
+                        <!-- Categorías -->
+                        <div class="col-12 mb-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-tags me-2"></i>Categorías
+                            </h6>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-semibold">Seleccionar Categorías</label>
+                            <div class="row">
+                                {% for category in categories %}
+                                    <div class="col-md-6 col-lg-4 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" 
+                                                   type="checkbox" 
+                                                   name="categories[]" 
+                                                   value="{{ category.id }}" 
+                                                   id="category_{{ category.id }}"
+                                                   {% if product.id and category in product.categories %}checked{% endif %}>
+                                            <label class="form-check-label" for="category_{{ category.id }}">
+                                                {{ category.name }}
+                                                {% if category.parent %}
+                                                    <small class="text-muted">({{ category.parent.name }})</small>
+                                                {% endif %}
+                                            </label>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-text">Selecciona una o más categorías para el producto</div>
+                        </div>
+
+                        <!-- Productos Relacionados -->
+                        {% if all_products is defined and all_products|length > 1 %}
+                            <div class="col-12 mb-4">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-link me-2"></i>Productos Relacionados
+                                </h6>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-semibold">Productos Relacionados</label>
+                                <div class="row" style="max-height: 200px; overflow-y: auto;">
+                                    {% for related_product in all_products %}
+                                        {% if related_product.id != product.id %}
+                                            <div class="col-md-6 col-lg-4 mb-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" 
+                                                           type="checkbox" 
+                                                           name="relatedProducts[]" 
+                                                           value="{{ related_product.id }}" 
+                                                           id="related_{{ related_product.id }}"
+                                                           {% if product.id and related_product in product.relatedProducts %}checked{% endif %}>
+                                                    <label class="form-check-label" for="related_{{ related_product.id }}">
+                                                        <small>{{ related_product.name }}</small>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <div class="form-text">Productos que aparecerán como sugerencias</div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Estado -->
+                        <div class="col-12 mb-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-cog me-2"></i>Configuración
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Estado del Producto</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       id="isActive" 
+                                       name="isActive" 
+                                       value="1"
+                                       {{ product.isActive ? 'checked' : '' }}>
+                                <label class="form-check-label" for="isActive">
+                                    Producto Activo
+                                </label>
+                            </div>
+                            <div class="form-text">Solo los productos activos aparecen en la tienda</div>
+                        </div>
+
+                        <!-- Información del Sistema -->
+                        <div class="col-12 mb-4">
+                            <h6 class="text-info mb-3">
+                                <i class="fas fa-clock me-2"></i>Información del Sistema
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small class="text-muted">
+                                        <strong>Creado:</strong> {{ product.createdAt ? product.createdAt|date('d/m/Y H:i') : 'N/A' }}
+                                    </small>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-muted">
+                                        <strong>Actualizado:</strong> {{ product.updatedAt ? product.updatedAt|date('d/m/Y H:i') : 'N/A' }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <a href="{{ path('admin_products_index') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Cancelar
+                            </a>
+                        </div>
+                        <div>
+                            <a href="{{ path('product_show', {'slug': product.slug}) }}" 
+                               class="btn btn-outline-info me-2" 
+                               target="_blank">
+                                <i class="fas fa-external-link-alt me-2"></i>Ver en Tienda
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save me-2"></i>Actualizar Producto
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Panel -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm sticky-top" style="top: 20px;">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="fas fa-eye me-2"></i>Vista Previa
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3" id="previewImage">
+                    {% if product.image %}
+                        <img src="{{ product.image }}" alt="Preview" style="max-width: 100%; height: 200px; object-fit: cover;" class="rounded">
+                    {% else %}
+                        <i class="fas fa-image fa-3x text-muted"></i>
+                    {% endif %}
+                </div>
+                
+                <h6 class="mb-2" id="previewName">{{ product.name }}</h6>
+                <p class="text-muted small mb-2" id="previewSku">SKU: {{ product.sku }}</p>
+                <p class="text-muted small mb-3" id="previewDescription">
+                    {{ product.description ?: 'Sin descripción...' }}
+                </p>
+                
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="h5 text-primary mb-0" id="previewPrice">${{ product.price }}</span>
+                    <span id="previewStatus" class="badge {{ product.isActive ? 'bg-success' : 'bg-secondary' }}">
+                        {{ product.isActive ? 'Activo' : 'Inactivo' }}
+                    </span>
+                </div>
+                
+                <div class="d-flex justify-content-between text-muted small">
+                    <span>Stock:</span>
+                    <strong id="previewStock">{{ product.stock }} unidades</strong>
+                </div>
+                
+                <div class="mt-3" id="previewCategories">
+                    {% if product.categories|length > 0 %}
+                        {% for category in product.categories %}
+                            <span class="badge bg-secondary me-1">{{ category.name }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <small class="text-muted">Sin categorías</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Panel -->
+        <div class="card shadow-sm mt-3">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Estadísticas
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="small">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Categorías:</span>
+                        <strong>{{ product.categories|length }}</strong>
+                    </div>
+                    {% if product.relatedProducts is defined %}
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Productos relacionados:</span>
+                            <strong>{{ product.relatedProducts|length }}</strong>
+                        </div>
+                    {% endif %}
+                    <div class="d-flex justify-content-between">
+                        <span>Estado de stock:</span>
+                        {% if product.stock > 10 %}
+                            <span class="badge bg-success rounded-pill">En stock</span>
+                        {% elseif product.stock > 0 %}
+                            <span class="badge bg-warning rounded-pill">Stock bajo</span>
+                        {% else %}
+                            <span class="badge bg-danger rounded-pill">Sin stock</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get form elements
+    const nameInput = document.getElementById('name');
+    const skuInput = document.getElementById('sku');
+    const descriptionInput = document.getElementById('description');
+    const priceInput = document.getElementById('price');
+    const stockInput = document.getElementById('stock');
+    const isActiveInput = document.getElementById('isActive');
+    const imageInput = document.getElementById('image');
+    const categoryInputs = document.querySelectorAll('input[name="categories[]"]');
+
+    // Preview elements
+    const previewName = document.getElementById('previewName');
+    const previewSku = document.getElementById('previewSku');
+    const previewDescription = document.getElementById('previewDescription');
+    const previewPrice = document.getElementById('previewPrice');
+    const previewStock = document.getElementById('previewStock');
+    const previewStatus = document.getElementById('previewStatus');
+    const previewImage = document.getElementById('previewImage');
+    const previewCategories = document.getElementById('previewCategories');
+
+    function updatePreview() {
+        // Basic info
+        previewName.textContent = nameInput.value || '{{ product.name }}';
+        previewSku.textContent = 'SKU: ' + (skuInput.value || '{{ product.sku }}');
+        
+        const description = descriptionInput.value || 'Sin descripción...';
+        previewDescription.textContent = description.length > 100 
+            ? description.substring(0, 100) + '...' 
+            : description;
+        
+        // Price and stock
+        previewPrice.textContent = '$' + (priceInput.value || '{{ product.price }}');
+        previewStock.textContent = (stockInput.value || '{{ product.stock }}') + ' unidades';
+        
+        // Status
+        if (isActiveInput.checked) {
+            previewStatus.textContent = 'Activo';
+            previewStatus.className = 'badge bg-success';
+        } else {
+            previewStatus.textContent = 'Inactivo';
+            previewStatus.className = 'badge bg-secondary';
+        }
+        
+        // Categories
+        const selectedCategories = Array.from(categoryInputs)
+            .filter(input => input.checked)
+            .map(input => input.nextElementSibling.textContent.trim());
+        
+        if (selectedCategories.length > 0) {
+            previewCategories.innerHTML = selectedCategories
+                .map(cat => `<span class="badge bg-secondary me-1">${cat}</span>`)
+                .join('');
+        } else {
+            previewCategories.innerHTML = '<small class="text-muted">Sin categorías</small>';
+        }
+        
+        // Image
+        if (imageInput.value) {
+            previewImage.innerHTML = `<img src="${imageInput.value}" alt="Preview" style="max-width: 100%; height: 200px; object-fit: cover;" class="rounded">`;
+        } else if (!previewImage.querySelector('img')) {
+            previewImage.innerHTML = '<i class="fas fa-image fa-3x text-muted"></i>';
+        }
+    }
+
+    // Add event listeners
+    nameInput.addEventListener('input', updatePreview);
+    skuInput.addEventListener('input', updatePreview);
+    descriptionInput.addEventListener('input', updatePreview);
+    priceInput.addEventListener('input', updatePreview);
+    stockInput.addEventListener('input', updatePreview);
+    isActiveInput.addEventListener('change', updatePreview);
+    imageInput.addEventListener('input', updatePreview);
+    categoryInputs.forEach(input => input.addEventListener('change', updatePreview));
+
+    // Auto-generate SKU from name (only if SKU is empty)
+    nameInput.addEventListener('input', function() {
+        if (!skuInput.value || skuInput.value === skuInput.getAttribute('data-original')) {
+            const sku = this.value
+                .toUpperCase()
+                .replace(/[^A-Z0-9]/g, '')
+                .substring(0, 15);
+            skuInput.value = sku;
+            updatePreview();
+        }
+    });
+
+    // Initial update
+    updatePreview();
+    
+    // Store original SKU for comparison
+    skuInput.setAttribute('data-original', skuInput.value);
+});
+</script>
+{% endblock %}

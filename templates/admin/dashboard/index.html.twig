@@ -1,0 +1,215 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Dashboard - Panel de Administración{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block body %}
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card stats-card text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-50 mb-1">Productos</h6>
+                            <h2 class="mb-0">{{ total_products }}</h2>
+                        </div>
+                        <div class="opacity-75">
+                            <i class="fas fa-box fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card stats-card success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-50 mb-1">Categorías</h6>
+                            <h2 class="mb-0">{{ total_categories }}</h2>
+                        </div>
+                        <div class="opacity-75">
+                            <i class="fas fa-tags fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card stats-card warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-50 mb-1">Clientes</h6>
+                            <h2 class="mb-0">{{ total_customers }}</h2>
+                        </div>
+                        <div class="opacity-75">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card stats-card info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-50 mb-1">Carritos Activos</h6>
+                            <h2 class="mb-0">{{ total_carts }}</h2>
+                        </div>
+                        <div class="opacity-75">
+                            <i class="fas fa-shopping-cart fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Recent Products -->
+        <div class="col-lg-6">
+            <div class="card admin-card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-box me-2"></i>Productos Recientes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_products %}
+                        <div class="list-group list-group-flush">
+                            {% for product in recent_products %}
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">{{ product.name }}</h6>
+                                            <small class="text-muted">SKU: {{ product.sku }}</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-{{ product.isActive ? 'success' : 'secondary' }}">
+                                                {{ product.isActive ? 'Activo' : 'Inactivo' }}
+                                            </span>
+                                            <div class="small text-muted">
+                                                Stock: {{ product.stock }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="{{ path('admin_products_index') }}" class="btn btn-outline-primary btn-sm">
+                                Ver todos los productos
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-box text-muted fa-3x mb-3"></i>
+                            <p class="text-muted">No hay productos creados</p>
+                            <a href="{{ path('admin_products_new') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Crear primer producto
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Active Carts -->
+        <div class="col-lg-6">
+            <div class="card admin-card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shopping-cart me-2"></i>Carritos con Productos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if carts_with_items %}
+                        <div class="list-group list-group-flush">
+                            {% for cart in carts_with_items %}
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                {% if cart.customer %}
+                                                    {{ cart.customer.fullName }}
+                                                {% else %}
+                                                    Usuario anónimo
+                                                {% endif %}
+                                            </h6>
+                                            <small class="text-muted">
+                                                {{ cart.totalItems }} {{ cart.totalItems == 1 ? 'producto' : 'productos' }}
+                                            </small>
+                                        </div>
+                                        <div class="text-end">
+                                            <strong>${{ cart.total|number_format(0, ',', '.') }}</strong>
+                                            <div class="small text-muted">
+                                                {{ cart.updatedAt|date('d/m/Y H:i') }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="{{ path('admin_carts_index') }}" class="btn btn-outline-primary btn-sm">
+                                Ver todos los carritos
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-shopping-cart text-muted fa-3x mb-3"></i>
+                            <p class="text-muted">No hay carritos activos</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card admin-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>Acciones Rápidas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-lg-3 col-md-6">
+                            <a href="{{ path('admin_products_new') }}" class="btn btn-outline-primary w-100 py-3">
+                                <i class="fas fa-plus fa-2x d-block mb-2"></i>
+                                Crear Producto
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <a href="{{ path('admin_categories_new') }}" class="btn btn-outline-success w-100 py-3">
+                                <i class="fas fa-tag fa-2x d-block mb-2"></i>
+                                Nueva Categoría
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <a href="{{ path('admin_orders_index') }}" class="btn btn-outline-warning w-100 py-3">
+                                <i class="fas fa-shopping-bag fa-2x d-block mb-2"></i>
+                                Ver Órdenes
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <a href="{{ path('home') }}" target="_blank" class="btn btn-outline-info w-100 py-3">
+                                <i class="fas fa-external-link-alt fa-2x d-block mb-2"></i>
+                                Ver Sitio Web
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Administrativo - SFStore</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚙️</text></svg>">
+    
+    <!-- Stylesheets -->
+    {{ encore_entry_link_tags('admin') }}
+</head>
+<body class="bg-light">
+    <div class="container-fluid vh-100">
+        <div class="row h-100">
+            <!-- Left Side - Branding -->
+            <div class="col-lg-6 d-none d-lg-flex bg-primary text-white p-0">
+                <div class="d-flex flex-column justify-content-center align-items-center w-100 p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-cogs fa-5x mb-4 opacity-75"></i>
+                        <h1 class="h2 fw-bold">SFStore Admin</h1>
+                        <p class="lead">Panel de administración</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="mb-3">Gestiona tu tienda online de manera eficiente</p>
+                        <div class="d-flex justify-content-center gap-4">
+                            <div class="text-center">
+                                <i class="fas fa-box fa-2x mb-2"></i>
+                                <div class="small">Productos</div>
+                            </div>
+                            <div class="text-center">
+                                <i class="fas fa-users fa-2x mb-2"></i>
+                                <div class="small">Clientes</div>
+                            </div>
+                            <div class="text-center">
+                                <i class="fas fa-chart-line fa-2x mb-2"></i>
+                                <div class="small">Análisis</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Side - Login Form -->
+            <div class="col-lg-6 d-flex flex-column justify-content-center">
+                <div class="mx-auto" style="max-width: 400px; width: 100%;">
+                    <!-- Mobile Header -->
+                    <div class="text-center d-lg-none mb-4">
+                        <i class="fas fa-cogs fa-3x text-primary mb-3"></i>
+                        <h1 class="h3">SFStore Admin</h1>
+                        <p class="text-muted">Panel de administración</p>
+                    </div>
+                    
+                    <!-- Login Card -->
+                    <div class="card shadow-lg border-0">
+                        <div class="card-body p-5">
+                            <h2 class="h4 fw-bold text-center mb-4">Iniciar Sesión</h2>
+                            
+                            {% if error %}
+                                <div class="alert alert-danger" role="alert">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                                </div>
+                            {% endif %}
+                            
+                            <form action="{{ path('admin_login') }}" method="post">
+                                <div class="mb-3">
+                                    <label for="username" class="form-label fw-semibold">
+                                        <i class="fas fa-user me-2"></i>Usuario
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="username" 
+                                        name="_username" 
+                                        class="form-control form-control-lg" 
+                                        value="{{ last_username }}" 
+                                        required 
+                                        autocomplete="username"
+                                        placeholder="Ingresa tu usuario"
+                                    >
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="password" class="form-label fw-semibold">
+                                        <i class="fas fa-lock me-2"></i>Contraseña
+                                    </label>
+                                    <input 
+                                        type="password" 
+                                        id="password" 
+                                        name="_password" 
+                                        class="form-control form-control-lg" 
+                                        required 
+                                        autocomplete="current-password"
+                                        placeholder="Ingresa tu contraseña"
+                                    >
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="form-check">
+                                        <input 
+                                            type="checkbox" 
+                                            id="remember_me" 
+                                            name="_remember_me" 
+                                            class="form-check-input"
+                                        >
+                                        <label class="form-check-label" for="remember_me">
+                                            Recordarme
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                                
+                                <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                                </button>
+                            </form>
+                            
+                            <hr class="my-4">
+                            
+                            <div class="text-center">
+                                <a href="{{ path('home') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Volver al sitio web
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="text-center mt-4">
+                        <small class="text-muted">
+                            © {{ 'now'|date('Y') }} SFStore. Todos los derechos reservados.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    {{ encore_entry_script_tags('admin') }}
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Panel de Administración - SFStore{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚙️</text></svg>">
+    
+    <!-- Stylesheets -->
+    {% block stylesheets %}
+        {{ encore_entry_link_tags('admin') }}
+    {% endblock %}
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <nav class="admin-sidebar">
+            <a href="{{ path('admin_dashboard') }}" class="sidebar-brand text-decoration-none">
+                <i class="fas fa-cogs me-2"></i>SFStore Admin
+            </a>
+            
+            <div class="nav flex-column mt-3">
+                <a href="{{ path('admin_dashboard') }}" class="nav-link {{ app.request.get('_route') == 'admin_dashboard' ? 'active' : '' }}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                
+                <div class="nav-section-title text-muted px-3 mt-3 mb-2">
+                    <small>CATÁLOGO</small>
+                </div>
+                
+                <a href="{{ path('admin_categories_index') }}" class="nav-link {{ app.request.get('_route') starts with 'admin_categories' ? 'active' : '' }}">
+                    <i class="fas fa-tags"></i> Categorías
+                </a>
+                
+                <a href="{{ path('admin_products_index') }}" class="nav-link {{ app.request.get('_route') starts with 'admin_products' ? 'active' : '' }}">
+                    <i class="fas fa-box"></i> Productos
+                </a>
+                
+                <div class="nav-section-title text-muted px-3 mt-3 mb-2">
+                    <small>VENTAS</small>
+                </div>
+                
+                <a href="{{ path('admin_orders_index') }}" class="nav-link {{ app.request.get('_route') starts with 'admin_orders' ? 'active' : '' }}">
+                    <i class="fas fa-shopping-bag"></i> Órdenes
+                </a>
+                
+                <a href="{{ path('admin_carts_index') }}" class="nav-link {{ app.request.get('_route') starts with 'admin_carts' ? 'active' : '' }}">
+                    <i class="fas fa-shopping-cart"></i> Carritos
+                </a>
+                
+                <div class="nav-section-title text-muted px-3 mt-3 mb-2">
+                    <small>SISTEMA</small>
+                </div>
+                
+                <a href="{{ path('home') }}" target="_blank" class="nav-link">
+                    <i class="fas fa-external-link-alt"></i> Ver sitio web
+                </a>
+                
+                <a href="{{ path('admin_logout') }}" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                </a>
+            </div>
+        </nav>
+        
+        <!-- Main Content Area -->
+        <div class="admin-content">
+            <!-- Top Navigation -->
+            <header class="admin-topbar d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-link btn-toggle-sidebar d-md-none">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="h5 mb-0 ms-2">
+                        {% block page_title %}{% endblock %}
+                    </h1>
+                </div>
+                
+                <div class="d-flex align-items-center">
+                    <span class="text-muted me-3">
+                        <i class="fas fa-user me-1"></i>{{ app.user.username }}
+                    </span>
+                </div>
+            </header>
+            
+            <!-- Alert Container -->
+            <div class="alert-container">
+                {% for label, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show m-3" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            
+            <!-- Main Content -->
+            <main class="admin-main">
+                {% block body %}{% endblock %}
+            </main>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    {% block javascripts %}
+        {{ encore_entry_script_tags('admin') }}
+    {% endblock %}
+</body>
+</html>
