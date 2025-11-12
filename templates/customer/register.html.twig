@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Cliente - SFStore</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>🛒</text></svg>">
+    
+    <!-- Stylesheets -->
+    {{ encore_entry_link_tags('app') }}
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ path('home') }}">
+                <i class="fas fa-store me-2"></i>SFStore
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ path('customer_login') }}">
+                    <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h2 class="h4 mb-0">
+                            <i class="fas fa-user-plus me-2"></i>Crear Cuenta
+                        </h2>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        {% if app.session.flashbag.peek('success')|length > 0 %}
+                            {% for message in app.session.flashbag.get('success') %}
+                                <div class="alert alert-success" role="alert">
+                                    <i class="fas fa-check-circle me-2"></i>{{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        {{ form_start(form, {'attr': {'class': 'row g-3', 'novalidate': 'novalidate'}}) }}
+                        
+                        <!-- Información Personal -->
+                        <div class="col-12">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-user me-2"></i>Información Personal
+                            </h5>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            {{ form_label(form.firstName, 'Nombre', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                            {{ form_widget(form.firstName, {'attr': {'class': 'form-control', 'placeholder': 'Tu nombre'}}) }}
+                            {{ form_errors(form.firstName) }}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            {{ form_label(form.lastName, 'Apellido', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                            {{ form_widget(form.lastName, {'attr': {'class': 'form-control', 'placeholder': 'Tu apellido'}}) }}
+                            {{ form_errors(form.lastName) }}
+                        </div>
+                        
+                        <div class="col-12">
+                            {{ form_label(form.email, 'Correo Electrónico', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'tu@email.com'}}) }}
+                            {{ form_errors(form.email) }}
+                            <div class="form-text">Este será tu nombre de usuario para iniciar sesión.</div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            {{ form_label(form.phone, 'Teléfono', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                            {{ form_widget(form.phone, {'attr': {'class': 'form-control', 'placeholder': '+1234567890'}}) }}
+                            {{ form_errors(form.phone) }}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            {{ form_label(form.dateOfBirth, 'Fecha de Nacimiento', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                            {{ form_widget(form.dateOfBirth, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.dateOfBirth) }}
+                        </div>
+                        
+                        <!-- Seguridad -->
+                        <div class="col-12 mt-4">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-shield-alt me-2"></i>Seguridad
+                            </h5>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            {{ form_label(form.password, 'Contraseña', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                            {{ form_widget(form.password, {'attr': {'class': 'form-control', 'placeholder': 'Mínimo 8 caracteres'}}) }}
+                            {{ form_errors(form.password) }}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            {{ form_label(form.confirmPassword, 'Confirmar Contraseña', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                            {{ form_widget(form.confirmPassword, {'attr': {'class': 'form-control', 'placeholder': 'Repite tu contraseña'}}) }}
+                            {{ form_errors(form.confirmPassword) }}
+                        </div>
+                        
+                        <!-- Dirección -->
+                        <div class="col-12 mt-4">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-map-marker-alt me-2"></i>Dirección
+                            </h5>
+                        </div>
+                        
+                        <div class="col-12">
+                            {{ form_label(form.address, 'Dirección', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                            {{ form_widget(form.address, {'attr': {'class': 'form-control', 'placeholder': 'Tu dirección completa'}}) }}
+                            {{ form_errors(form.address) }}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            {{ form_label(form.city, 'Ciudad', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                            {{ form_widget(form.city, {'attr': {'class': 'form-control', 'placeholder': 'Tu ciudad'}}) }}
+                            {{ form_errors(form.city) }}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            {{ form_label(form.postalCode, 'Código Postal', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                            {{ form_widget(form.postalCode, {'attr': {'class': 'form-control', 'placeholder': '12345'}}) }}
+                            {{ form_errors(form.postalCode) }}
+                        </div>
+                        
+                        <div class="col-12">
+                            {{ form_label(form.country, 'País', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                            {{ form_widget(form.country, {'attr': {'class': 'form-control', 'placeholder': 'Tu país'}}) }}
+                            {{ form_errors(form.country) }}
+                        </div>
+                        
+                        <!-- Términos -->
+                        <div class="col-12 mt-4">
+                            <div class="form-check">
+                                {{ form_widget(form.agreeTerms, {'attr': {'class': 'form-check-input'}}) }}
+                                <label class="form-check-label" for="{{ form.agreeTerms.vars.id }}">
+                                    Acepto los <a href="#" class="text-primary">términos y condiciones</a> y la <a href="#" class="text-primary">política de privacidad</a>
+                                </label>
+                            </div>
+                            {{ form_errors(form.agreeTerms) }}
+                        </div>
+                        
+                        <!-- Submit -->
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                <i class="fas fa-user-check me-2"></i>Crear Cuenta
+                            </button>
+                        </div>
+                        
+                        {{ form_end(form) }}
+                        
+                        <div class="text-center mt-3">
+                            <p class="mb-0">¿Ya tienes una cuenta?</p>
+                            <a href="{{ path('customer_login') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Benefits -->
+                <div class="row mt-4">
+                    <div class="col-md-4 text-center mb-3">
+                        <div class="bg-white p-3 rounded shadow-sm">
+                            <i class="fas fa-shipping-fast fa-2x text-primary mb-2"></i>
+                            <h6>Envío Gratis</h6>
+                            <small class="text-muted">En compras superiores a $50</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center mb-3">
+                        <div class="bg-white p-3 rounded shadow-sm">
+                            <i class="fas fa-undo fa-2x text-primary mb-2"></i>
+                            <h6>Devoluciones</h6>
+                            <small class="text-muted">30 días para devolver</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center mb-3">
+                        <div class="bg-white p-3 rounded shadow-sm">
+                            <i class="fas fa-headset fa-2x text-primary mb-2"></i>
+                            <h6>Soporte 24/7</h6>
+                            <small class="text-muted">Atención al cliente</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-3 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <small>&copy; {{ 'now'|date('Y') }} SFStore. Todos los derechos reservados.</small>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="text-white-50 text-decoration-none me-3">Términos</a>
+                    <a href="#" class="text-white-50 text-decoration-none">Privacidad</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    {{ encore_entry_script_tags('app') }}
+</body>
+</html>
